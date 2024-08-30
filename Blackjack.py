@@ -13,7 +13,8 @@ values = {
     "Jack": 10,
     "Queen": 10,
     "King": 10,
-    "Ace": 1}
+    "Ace": 1,
+}
 
 high_values = {
     "Two": 2,
@@ -28,7 +29,9 @@ high_values = {
     "Jack": 10,
     "Queen": 10,
     "King": 10,
-    "Ace": 11}
+    "Ace": 11,
+}
+
 
 class Player:
     def __init__(self, name):
@@ -37,42 +40,40 @@ class Player:
 
     def add_card(self, new_card):
         self.all_cards.append(new_card)
+        self.show()
 
     def show(self):
         print(f"Player {self.name} has:")
         for card in self.all_cards:
-            print(card.__str__())
+            print(card.__str__(), end=", ")
+        print("\n")
 
     def hit_or_stand(self):
-        response = input(f"player {self.name} would you like to hit or stand(answer with 'h' or 's')")
+        response = input(
+            f"player {self.name} would you like to hit or stand(answer with 'h' or 's')"
+        )
         return response
 
     def is_busted(self):
         """Returns true if the hand is busted"""
         value = 0
-        for card in self.all_cards: 
+        for card in self.all_cards:
             value += values[card.rank]
 
-        if value > 21:
-            return True
-        else:
-            return False
-        
+        return value > 21
+
     def is_blackjack(self):
         """Returns true if the hand is a blackjack"""
         value = 0
-        for card in self.all_cards: 
+        for card in self.all_cards:
             value += high_values[card.rank]
 
-        if value == 21:
-            return True
-        else:
-            return False
+        return value == 21
 
     def value(self):
         """Returns value for final comparison"""
         value = 0
-        for card in self.all_cards: 
+        for card in self.all_cards:
             value += values[card.rank]
         # find the number of aces
         num_aces = 0
@@ -83,8 +84,6 @@ class Player:
         for i in range(num_aces):
             if value + 10 <= 21:
                 value += 10
-        # loop through, if ad
-        # ding 10, won't bust, then add 10
 
         return value
 
@@ -97,54 +96,42 @@ def game():
 
     # deal two cards player and computer
     player_one.add_card(my_deck.deal_one())
-    player_one.add_card(my_deck.deal_one())
     player_two.add_card(my_deck.deal_one())
 
-    # show player their cards and computer's first card
-    player_one.show()
-    player_two.show()
-    if player_one.is_blackjack():
-        print("Blackjack!")
-    else:
-        while True :
-            response = player_one.hit_or_stand()
-            if response == "h":
-                player_one.add_card(my_deck.deal_one())
-                player_one.show()
-                if player_one.is_busted():
-                    print("You went bust!, player two wins")
-                    return    
-            else:
-                break
-    player_two.add_card(my_deck.deal_one())
-    player_two.show()
-    if player_two.is_blackjack():
-        print("Blackjack!")
-    else:
-        while True :
-            response = player_two.hit_or_stand()
-            if response == "h":
-                player_two.add_card(my_deck.deal_one())
-                player_two.show()
-                if player_two.is_busted():
-                    print("You went bust!, player one wins")
-                    return
-            else:
-                break
-    #compare cards and declare winner
-    if player_one.is_blackjack() and player_two.is_blackjack():
-        print("Push")
-    elif player_one.is_blackjack():
-        print("Player one wins")
-    elif player_two.is_blackjack():
-        print("Player two wins")
-    else:
+    blackjack = []
+
+    for player in [player_one, player_two]:
+        player.add_card(my_deck.deal_one())
+
+        if player.is_blackjack():
+            print(f"Player {player.name} has Blackjack!")
+            blackjack.append(player.name)
+        else:
+            while True:
+                response = player.hit_or_stand()
+                if response == "h":
+                    player.add_card(my_deck.deal_one())
+
+                    if player.is_busted():
+                        print(f"Player {player.name} You went bust!")
+                        return
+                else:
+                    break
+
+    # compare cards and declare winner
+    if len(blackjack) == 0:
         if player_one.value() > player_two.value():
             print("Player one wins")
         elif player_one.value() < player_two.value():
             print("Player two wins")
         else:
             print("Push")
+    elif len(blackjack) == 2:
+        print("Push")
+    elif blackjack[0] == "One":
+        print("Player one wins")
+    elif blackjack[0] == "Two":
+        print("Player two wins")
 
 
 if __name__ == "__main__":
